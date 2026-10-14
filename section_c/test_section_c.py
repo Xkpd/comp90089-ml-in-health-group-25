@@ -1,6 +1,5 @@
-"""Software checks with SYNTHETIC data; no MIMIC records or research results."""
+"""Pipeline tests using synthetic patient data."""
 from pathlib import Path
-import json
 import numpy as np
 import pandas as pd
 import pytest
@@ -90,16 +89,17 @@ def test_unknown_and_duplicate_patients_fail(tmp_path):
 
 def test_end_to_end_training_and_evaluation(tmp_path):
     cfg = synthetic_inputs(tmp_path)
-    run = c.run_development(cfg)
+    # Older saved runs may include descriptive settings that no longer affect training.
+    run = c.run_development({**cfg, "cohort_description": "Legacy cohort note"})
     out = run["output_dir"]
     assert c.final_evaluation(run, enabled=False) is None
-    assert not (out / "FINAL_test_predictions_for_D.csv").exists()
+    assert not (out / "FINAL_test_predictions.csv").exists()
     assert not (out / "final_test_started.json").exists()
     assert all(run["oof"][n].between(0, 1).all() for n in c.PROBABILITY_MODELS)
     frozen = run["bundle"]["frozen"]
     assert frozen["test_outcomes_used_for_training_or_selection"] is False
     assert frozen["selected_primary_model"] in c.MODEL_NAMES
-    # Every development patient is predicted exactly once, every model shares that row.
+    # Each patient has one out-of-fold prediction per model.
     assert run["oof"].subject_id.is_unique
     assert len(run["oof"]) == frozen["development_n"]
     coef, shap = c.export_interpretation(run, max_patients=30)
@@ -109,7 +109,7 @@ def test_end_to_end_training_and_evaluation(tmp_path):
     assert matched.n.nunique() == 1
     assert matched.loc[matched.model.eq("rsbi"), "brier"].isna().all()
     assert (out / "FINAL_paired_difference_XGB_minus_LR_CI.csv").exists()
-    # Identical reruns reuse frozen models and can reproduce the handoff safely.
+    # Identical reruns reuse frozen models and results.
     second = c.run_development(cfg)
     assert np.allclose(c.final_evaluation(second, enabled=True).auroc, result.auroc)
     with pytest.raises(RuntimeError, match="settings/data changed"):

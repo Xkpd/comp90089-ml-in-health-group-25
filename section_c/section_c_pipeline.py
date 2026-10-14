@@ -1,8 +1,4 @@
-"""Section C: reproducible development and a shared, separately run evaluation.
-
-The notebook contains this same source so it can be integrated with B's notebook.
-No patient data are bundled. See README.txt for the input contract and limitations.
-"""
+"""Train and evaluate logistic regression and XGBoost for extubation outcomes."""
 
 # %% Imports and defaults
 from pathlib import Path
@@ -33,26 +29,21 @@ from xgboost import DMatrix, XGBClassifier
 
 DEFAULT_CONFIG = {
     "data_csv": "../data/clean_final_dataset.csv",
-    "metadata_csv": "../data/cohort_metadata.csv",  # optional if columns in main CSV
+    "metadata_csv": "../data/cohort_metadata.csv",  # optional if included in data_csv
     "output_dir": "outputs/main_analysis",
     "target": "combined_outcome", "seed": 42,
-    "split_mode": "temporal",  # explicit alternative: stratified; report the deviation
+    "split_mode": "temporal",  # temporal or stratified
     "temporal_cutoff": None,  # None: start of latest observed anchor_year_group
-    "test_fraction": 0.20,  # used ONLY for the explicit stratified alternative
+    "test_fraction": 0.20,  # stratified split only
     "outer_folds": 5, "inner_folds": 3,
     "search_iterations": 8, "xgb_threads": 4,
     "calibrate": True, "sensitivity_target": 0.80,
     "bootstrap_replicates": 1000,
-    "feature_columns": None,  # explicit list or conservative recognised-name selection
+    "feature_columns": None,  # None selects recognised predictor names
     "categorical_columns": ["gender", "sex", "first_careunit"],
     "rsbi_column": None,  # auto: RSBI_bin_5, rsbi_bin_5, RSBI, rsbi (in this order)
-    "rsbi_description": "Proxy from B's aggregated respiratory measurements; not verified SBT RSBI",
-    "mimic_version": "3.1",
-    "cohort_description": "B's approved adult planned-extubation cohort; verify the extraction definition",
-    "feature_window_hours": 6, "outcome_window_hours": 48,
-    "missingness_policy": "Upstream patient/feature exclusions must be described by B",
     "synthetic_data": False,
-    "quick_test": False,  # reduced search ONLY for software checks, never report as main analysis
+    "quick_test": False,  # reduced search for software tests
 }
 
 PHYSIOLOGY = {
@@ -70,7 +61,7 @@ PROBABILITY_MODELS = MODEL_NAMES + ["prevalence_baseline"]
 
 
 def write_json(path, value):
-    """Save readable settings, including numpy scalar values."""
+    """Save settings, converting NumPy scalars and paths to JSON values."""
     def encode(x):
         if isinstance(x, np.generic):
             return x.item()
@@ -89,10 +80,10 @@ def file_hash(path):
 
 
 def binary_series(s, name):
-    """Reject unknown labels instead of turning them into outcome-negative patients."""
+    """Require observed binary labels."""
     out = pd.to_numeric(s, errors="raise")
     if out.isna().any() or not out.isin([0, 1]).all():
-        raise ValueError(f"{name} must contain only observed 0/1 labels; resolve unknown follow-up with B.")
+        raise ValueError(f"{name} must contain only observed 0/1 labels.")
     return out.astype(int)
 
 
@@ -106,19 +97,19 @@ def recognised_feature(name):
     n = name.lower()
     if n in BASELINE:
         return True
-    # Accept B's six hourly bins OR explicitly labelled whole-window summaries.
+    # Recognise hourly bins and whole-window summaries.
     base = re.sub(r"(_bin_[0-5]|_(mean|std|sd|min|max|last|slope|count|missing)(?:_6h)?|_6h)$", "", n)
     return base in PHYSIOLOGY
 
 
-# %% Validate CSV and separate features, labels and metadata
+# %% Load and validate inputs
 def load_cohort(cfg):
     path = Path(cfg["data_csv"])
     if not path.exists():
-        raise FileNotFoundError(f"CSV not found: {path.resolve()}. Set data_csv to B's complete pre-median-imputation cohort CSV, not an already split/imputed train_set file.")
+        raise FileNotFoundError(f"CSV not found: {path.resolve()}. Set data_csv to the full cohort before median imputation and splitting.")
     if path.stem.startswith(("train_set", "test_set", "X_train", "X_test")):
-        raise ValueError("Use the complete pre-median-imputation cohort export, not B's pre-split train/test files. C creates one shared split for every model.")
-    # pandas automatically renames repeated headers; catch them before that occurs.
+        raise ValueError("Use the full cohort before median imputation and splitting.")
+    # Check duplicate headers before pandas renames them.
     with path.open(newline="", encoding="utf-8-sig") as f:
         header = next(csv.reader(f))
     if len(header) != len(set(header)):
@@ -129,8 +120,8 @@ def load_cohort(cfg):
     if "subject_id" not in df or cfg["target"] not in df:
         raise ValueError("Required columns: subject_id and " + cfg["target"])
     if df.subject_id.isna().any() or df.subject_id.duplicated().any():
-        raise ValueError("Expected ONE row per subject_id. Do not drop duplicates arbitrarily: B must resolve the eligible index extubation.")
-    # Stable row order makes the manifest reproducible even if the CSV is reordered.
+        raise ValueError("Expected ONE row per subject_id, with a single index extubation.")
+    # Keep splits reproducible if input rows are reordered.
     df = df.sort_values("subject_id").reset_index(drop=True)
     df[cfg["target"]] = binary_series(df[cfg["target"]], cfg["target"])
     components_present = [c in df for c in OUTCOME_COMPONENTS]
@@ -138,15 +129,15 @@ def load_cohort(cfg):
         for c in OUTCOME_COMPONENTS:
             df[c] = binary_series(df[c], c)
         if not np.array_equal(df[cfg["target"]], df[OUTCOME_COMPONENTS].max(axis=1)):
-            raise ValueError("combined_outcome disagrees with death OR reintubation. Fix B's labels before training.")
+            raise ValueError("combined_outcome disagrees with death OR reintubation.")
     else:
-        warnings.warn("Outcome component columns absent/incomplete; cannot verify the combined label. Obtain component counts from B.")
+        warnings.warn("Outcome components are missing; cannot verify the combined label.")
     metadata_path = Path(cfg["metadata_csv"]) if cfg.get("metadata_csv") else None
     if metadata_path and metadata_path.exists():
         meta = pd.read_csv(metadata_path, dtype={"subject_id": "string"})
         if "subject_id" not in meta or meta.subject_id.isna().any() or meta.subject_id.duplicated().any():
             raise ValueError("Metadata must have one non-missing row per subject_id.")
-        # Existing main-CSV columns take precedence only if their values agree.
+        # Overlapping columns must agree before merging metadata.
         both = sorted((set(meta.columns) & set(df.columns)) - {"subject_id"})
         joined = df[["subject_id"] + both].merge(meta, on="subject_id", how="left", validate="one_to_one", suffixes=("_main", "_meta"))
         for c in both:
@@ -158,13 +149,13 @@ def load_cohort(cfg):
     if "followup_complete" in df:
         known = pd.to_numeric(df.followup_complete, errors="coerce")
         if ((df[cfg["target"]] == 0) & (known != 1)).any():
-            raise ValueError("Some negative labels have incomplete/unknown follow-up. Agree the endpoint/observation policy with B; do not silently relabel or drop them.")
+            raise ValueError("Negative labels have incomplete/unknown follow-up; resolve them before training.")
     else:
-        warnings.warn("No followup_complete flag: this CSV cannot distinguish an observed 48-hour negative from incomplete observation. This is an upstream limitation, not repaired by modelling.")
+        warnings.warn("No followup_complete flag; cannot verify 48-hour observation for negative labels.")
     requested = cfg.get("feature_columns")
     selected = list(requested) if requested is not None else [c for c in df if recognised_feature(c)]
     if not selected or len(set(selected)) != len(selected):
-        raise ValueError("No recognised predictors, or duplicate feature list. Set feature_columns explicitly from B's data dictionary.")
+        raise ValueError("No recognised predictors or duplicate features. Set feature_columns explicitly.")
     if not set(selected).issubset(df.columns):
         raise ValueError("Feature columns missing: " + str(sorted(set(selected) - set(df.columns))))
     leaks = [c for c in selected if forbidden_feature(c, cfg["target"])]
@@ -184,10 +175,10 @@ def load_cohort(cfg):
         raise ValueError("Configured rsbi_column is absent.")
     if rsbi_col:
         df[rsbi_col] = pd.to_numeric(df[rsbi_col], errors="raise").replace([np.inf, -np.inf], np.nan)
-        # An impossible negative/zero respiratory index is not an available measurement.
+        # Non-positive RSBI values are invalid measurements.
         df.loc[df[rsbi_col] <= 0, rsbi_col] = np.nan
     else:
-        warnings.warn("No RSBI column: the clinical comparator will be omitted, with a recorded reason. Do not infer it from unrelated measurement times.")
+        warnings.warn("No RSBI column; skipping the RSBI comparison.")
     audit = pd.DataFrame({"column": df.columns})
     audit["used_as_predictor"] = audit.column.isin(selected)
     audit["reason"] = ["predictor" if c in selected else "blocked ID/outcome/time/follow-up" if forbidden_feature(c, cfg["target"]) else "metadata or unrecognised: not selected" for c in audit.column]
@@ -197,7 +188,7 @@ def load_cohort(cfg):
     return df, nums, cats, rsbi_col, audit, hashes
 
 
-# %% One shared patient-level split
+# %% Patient splits
 def make_split(df, cfg):
     manifest = df[["subject_id"]].copy()
     manifest["partition"] = "ambiguous_time"
@@ -205,16 +196,16 @@ def make_split(df, cfg):
         required = ["extubation_time", "anchor_year", "anchor_year_group"]
         missing = [c for c in required if c not in df]
         if missing:
-            raise ValueError("Temporal holdout needs " + str(missing) + ". Ask B for cohort_metadata.csv keyed by subject_id. Shifted calendar dates cannot be compared across patients. An explicit stratified split is available but changes the proposal.")
+            raise ValueError("Temporal holdout needs " + str(missing) + ". Include them in data_csv or metadata_csv, keyed by subject_id.")
         groups = df.anchor_year_group.astype(str).str.extract(r"^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$").astype(float)
         anchor = pd.to_numeric(df.anchor_year, errors="coerce")
         year = pd.to_datetime(df.extubation_time, errors="coerce").dt.year
         if groups.isna().any().any() or anchor.isna().any() or year.isna().any():
-            raise ValueError("Temporal metadata have missing/invalid values; no silent random fallback.")
+            raise ValueError("Temporal metadata contain missing or invalid values.")
         if (groups[1] < groups[0]).any() or (anchor % 1 != 0).any():
             raise ValueError("Invalid anchor year or year-group interval.")
         offset = year - anchor
-        # MIT's patients-table documentation gives this year-interval mapping.
+        # Map shifted extubation years to possible calendar-year intervals.
         manifest["possible_year_lower"] = (groups[0] + offset).astype(int)
         manifest["possible_year_upper"] = (groups[1] + offset).astype(int)
         cutoff = cfg["temporal_cutoff"] if cfg["temporal_cutoff"] is not None else int(groups[0].max())
@@ -231,9 +222,9 @@ def make_split(df, cfg):
     dev = np.flatnonzero(manifest.partition.eq("development"))
     test = np.flatnonzero(manifest.partition.eq("test"))
     if not len(dev) or not len(test):
-        raise ValueError("Empty development/test set. Inspect year intervals and agree a defensible cutoff before modelling.")
+        raise ValueError("Empty development/test set. Check year intervals and temporal_cutoff.")
     assert not set(df.iloc[dev].subject_id) & set(df.iloc[test].subject_id)
-    # Need two classes in development. Do not inspect held-out outcomes to tune the split.
+    # Validate fold sizes using development labels only.
     checked_cv(df.iloc[dev][cfg["target"]].to_numpy(), cfg["outer_folds"], cfg["seed"])
     return manifest, dev, test, split_note
 
@@ -241,13 +232,13 @@ def make_split(df, cfg):
 def checked_cv(y, folds, seed):
     counts = np.bincount(np.asarray(y, dtype=int), minlength=2)
     if folds < 2 or min(counts) < folds:
-        raise ValueError(f"Need at least {folds} patients of EACH class for this CV; observed {counts.tolist()}. Reduce folds explicitly or revisit cohort feasibility; do not fabricate/resample validation patients.")
+        raise ValueError(f"Need at least {folds} patients in each class for cross-validation; found {counts.tolist()}.")
     return list(StratifiedKFold(folds, shuffle=True, random_state=seed).split(np.zeros(len(y)), y))
 
 
-# %% Training-only preprocessing and the two proposal models
+# %% Preprocessing, tuning and calibration
 class FoldBalancedXGB(ClassifierMixin, BaseEstimator):
-    """Calculate class weight inside EVERY fit, including each inner CV fit."""
+    """Calculate class weights from the current training fold."""
     def __init__(self, n_estimators=250, max_depth=3, learning_rate=0.05,
                  min_child_weight=1, reg_lambda=1, subsample=0.8,
                  colsample_bytree=0.8, random_state=42, n_jobs=4):
@@ -314,21 +305,20 @@ def fit_tuned(name, X, y, nums, cats, cfg, cv):
     search.fit(X, y)
     fitted = search.best_estimator_
     if cfg["calibrate"]:
-        # Cross-validated calibration data are confined to this training partition.
-        # ensemble=False refits the selected base pipeline on all of this partition.
+        # Calibrate within training folds, then refit on this training partition.
         fitted = CalibratedClassifierCV(clone(fitted), method="sigmoid", cv=cv, ensemble=False, n_jobs=1)
         fitted.fit(X, y)
     cols = [c for c in search.cv_results_ if c == "params" or c.startswith(("mean_test_", "std_test_", "rank_test_", "mean_fit_"))]
     return fitted, search.best_params_, pd.DataFrame(search.cv_results_)[cols]
 
 
-# %% Common metrics, thresholds and plots
+# %% Metrics, thresholds and plots
 def safe_ratio(a, b):
     return float(a / b) if b else np.nan
 
 
 def metrics(y, score, threshold=0.5, probability=True):
-    """The same evaluator is used for every comparable prediction vector."""
+    """Compute classification metrics and, for probabilities, calibration losses."""
     y, score = np.asarray(y, int), np.asarray(score, float)
     keep = np.isfinite(score)
     y, score = y[keep], score[keep]
@@ -348,7 +338,7 @@ def metrics(y, score, threshold=0.5, probability=True):
 
 
 def choose_threshold(y, score, sensitivity_target):
-    """Highest specificity at >= target sensitivity, based ONLY on development OOF."""
+    """Maximise specificity at the target sensitivity using development OOF scores."""
     if not 0 < sensitivity_target <= 1:
         raise ValueError("sensitivity_target must be in (0,1].")
     fpr, tpr, thresholds = roc_curve(y, score, drop_intermediate=False)
@@ -380,7 +370,7 @@ def comparison_tables(predictions, thresholds):
         p = predictions.loc[mask]
         for name in PROBABILITY_MODELS + ["random_guess"]:
             if name in p:
-                # Random uniform scores have no probability calibration interpretation.
+                # Calibration losses apply to probability models only.
                 rows.append({"scope": scope, "model": name, **metrics(p.y_true, p[name], thresholds.get(name, 0.5), name in PROBABILITY_MODELS)})
         if scope == "rsbi_available_same_patients":
             rows.append({"scope": scope, "model": "rsbi", **metrics(p.y_true, p.rsbi, 105, False)})
@@ -396,8 +386,7 @@ def plot_comparison(p, folder, prefix, include_rsbi=False):
             fpr, tpr, _ = roc_curve(p.y_true, p[name])
             precision, recall, _ = precision_recall_curve(p.y_true, p[name])
             axes[0].plot(fpr, tpr, label=name)
-            # Step interpolation matches the AP convention; avoid a misleading
-            # diagonal from a constant-probability baseline to precision=1.
+            # Step interpolation matches average precision.
             axes[1].step(recall, precision, where="post", label=name)
         axes[0].plot([0, 1], [0, 1], "k--", alpha=.5)
         axes[1].axhline(p.y_true.mean(), color="k", linestyle="--", label="prevalence")
@@ -414,20 +403,21 @@ def plot_comparison(p, folder, prefix, include_rsbi=False):
     plt.close(fig)
 
 
-# %% Nested development, frozen settings and handoff files
+# %% Model development
 def run_development(config):
     cfg = {**DEFAULT_CONFIG, **config}
     out = Path(cfg["output_dir"])
     out.mkdir(parents=True, exist_ok=True)
     df, nums, cats, rsbi_col, audit, hashes = load_cohort(cfg)
-    # Identical reruns can reproduce saved results without retuning after test access.
+    # Reuse frozen models after the test set has been opened.
     if (out / "final_test_started.json").exists():
         frozen = json.loads((out / "frozen_analysis.json").read_text())
-        if cfg != frozen["config"] or hashes != frozen["source_hashes"]:
-            raise RuntimeError("Final test already opened and settings/data changed. Do not retune against this test set; retain the frozen analysis and discuss any new study separately.")
+        settings_changed = any(cfg[key] != frozen["config"].get(key) for key in DEFAULT_CONFIG)
+        if settings_changed or hashes != frozen["source_hashes"]:
+            raise RuntimeError("Final test already opened and settings/data changed. Restore the frozen settings and data.")
         bundle = joblib.load(out / "trained_models.joblib")
         dev = df.set_index("subject_id", drop=False).loc[bundle["development_ids"]].reset_index(drop=True)
-        print("Final test was previously opened. Reusing the unchanged frozen models, splits and results; no retuning.")
+        print("Reusing saved models and results; final evaluation has already started.")
         return {"bundle": bundle, "data": df, "development": dev,
             "oof": pd.read_csv(out / "development_oof_predictions.csv", dtype={"subject_id": "string"}),
             "manifest": pd.read_csv(out / "patient_split_manifest.csv", dtype={"subject_id": "string"}), "output_dir": out}
@@ -435,10 +425,10 @@ def run_development(config):
     dev = df.iloc[dev_idx].reset_index(drop=True)
     X, y = dev[nums + cats], dev[cfg["target"]].to_numpy()
     if min(np.bincount(y, minlength=2)) < 50:
-        warnings.warn("Fewer than 50 development patients in one class: tuning, calibration and subgroup conclusions may be very unstable. Report this, not only a performance number.")
+        warnings.warn("Fewer than 50 development patients in one class; estimates may be unstable.")
     outer = checked_cv(y, cfg["outer_folds"], cfg["seed"])
     scores = {n: np.full(len(dev), np.nan) for n in PROBABILITY_MODELS}
-    # A stable random-score reference; this is not a learned risk model.
+    # Fixed random scores provide a reproducible chance baseline.
     scores["random_guess"] = np.random.default_rng(cfg["seed"]).uniform(size=len(dev))
     folds = np.full(len(dev), -1, dtype=int)
     fold_results, best_params = [], []
@@ -468,7 +458,7 @@ def run_development(config):
     winner = str(ranked.index[0])
     thresholds = {name: choose_threshold(y, scores[name], cfg["sensitivity_target"]) for name in MODEL_NAMES}
     thresholds.update({"prevalence_baseline": 0.5, "random_guess": 0.5})
-    # These data chose the thresholds: this file is NOT an unbiased validation result.
+    # Threshold-selection scores are descriptive, not independent validation.
     comparison_tables(oof, thresholds).to_csv(out / "threshold_derivation_DESCRIPTIVE_NOT_VALIDATION.csv", index=False)
     plot_comparison(oof, out, "development_oof")
     if "rsbi" in oof:
@@ -482,7 +472,7 @@ def run_development(config):
         final_models[name] = fitted
         final_params[name] = params
         search_table.to_csv(out / f"search_final_development_{name}.csv", index=False)
-    # Feature missingness is described for DEVELOPMENT only until the final test is opened.
+    # Describe missingness on development patients only.
     dev[nums + cats].isna().mean().rename("missing_fraction_development").to_csv(out / "development_feature_missingness.csv")
     audit.to_csv(out / "feature_audit.csv", index=False)
     write_json(out / "outer_best_parameters.json", best_params)
@@ -496,19 +486,16 @@ def run_development(config):
         "selected_primary_model": winner, "selection_rule": "highest mean outer-fold AUROC, before final test",
         "mean_outer_fold_auroc": ranked.to_dict(), "final_parameters": final_params,
         "development_n": len(dev), "development_events": int(y.sum()),
-        "test_outcomes_used_for_training_or_selection": False,
-        "limitations": ["C cannot verify event linkage, exclusion rules, lab availability or follow-up from aggregated CSV alone.",
-            "Calibration fitted inside training partitions; weighting can still affect reliability.",
-            "Changing hourly features to six-hour summaries changes the trend question; document the final feature definition."]}
+        "test_outcomes_used_for_training_or_selection": False}
     write_json(out / "frozen_analysis.json", frozen)
     bundle = {"models": final_models, "frozen": frozen, "development_prevalence": float(y.mean()),
         "development_ids": dev.subject_id.tolist(), "test_ids": df.iloc[test_idx].subject_id.tolist()}
     joblib.dump(bundle, out / "trained_models.joblib")
-    print(f"Development complete. Primary model selected on development CV: {winner}. Final test remains unopened.")
+    print(f"Development complete. Selected model: {winner}. Final test not evaluated.")
     return {"bundle": bundle, "data": df, "development": dev, "oof": oof, "manifest": manifest, "output_dir": out}
 
 
-# %% Interpretation of development-fitted base models (not causal explanations)
+# %% Model interpretation
 def base_pipeline(model):
     return model.calibrated_classifiers_[0].estimator if isinstance(model, CalibratedClassifierCV) else model
 
@@ -522,7 +509,7 @@ def export_interpretation(run, max_patients=300):
     coefficients = pd.DataFrame({"feature": names, "coefficient": lr.named_steps["model"].coef_[0]})
     coefficients["abs_coefficient"] = coefficients.coefficient.abs()
     coefficients.sort_values("abs_coefficient", ascending=False).to_csv(out / "logistic_base_coefficients.csv", index=False)
-    # XGBoost provides exact TreeSHAP contributions without the optional shap package.
+    # Native TreeSHAP contributions sum to the base model's log odds.
     xgb = base_pipeline(bundle["models"]["xgboost"])
     sample = dev[features].sample(min(max_patients, len(dev)), random_state=cfg["seed"])
     transformed = xgb.named_steps["preprocess"].transform(sample)
@@ -543,9 +530,9 @@ def export_interpretation(run, max_patients=300):
     return coefficients, shap_table
 
 
-# %% Final evaluation: run only after decisions are frozen, shared with member D
+# %% Final evaluation
 def bootstrap_intervals(p, thresholds, cfg):
-    """Paired patient bootstrap: same sampled patients for every model per replicate."""
+    """Use the same resampled patients for every model in each bootstrap replicate."""
     rng = np.random.default_rng(cfg["seed"] + 200)
     samples, differences = [], []
     for rep in range(cfg["bootstrap_replicates"]):
@@ -568,7 +555,7 @@ def bootstrap_intervals(p, thresholds, cfg):
 
 def final_evaluation(run, enabled=False):
     if not enabled:
-        print("Final test is disabled. Member D can run this cell once the model/features/threshold rule are fixed.")
+        print("Final test disabled. Enable it after fixing models, features and thresholds.")
         return None
     bundle, df, out = run["bundle"], run["data"], run["output_dir"]
     frozen = bundle["frozen"]
@@ -579,12 +566,12 @@ def final_evaluation(run, enabled=False):
     if marker.exists():
         prior = json.loads(marker.read_text())
         if prior.get("analysis_signature") != signature or prior.get("model_sha256") != model_hash:
-            raise RuntimeError("Frozen analysis/models changed after test access. Do not reselect methods using this test set.")
+            raise RuntimeError("Models or settings changed after final evaluation started.")
         if prior["status"] == "completed":
-            print("Returning previously completed, unchanged final-test results.")
+            print("Loading saved final-test results.")
             return pd.read_csv(out / "FINAL_test_metrics.csv")
-        print("Resuming the same frozen final evaluation after an interruption; no model fitting.")
-    # This intentional marker also survives an interrupted evaluation.
+        print("Resuming final evaluation with the saved models.")
+    # Save the marker before evaluation so interrupted runs can resume.
     marker_info = {"analysis_signature": signature, "model_sha256": model_hash,
         "selected_primary_model": frozen["selected_primary_model"], "synthetic_data": cfg["synthetic_data"]}
     write_json(marker, {**marker_info, "status": "started"})
@@ -594,7 +581,7 @@ def final_evaluation(run, enabled=False):
     scores["prevalence_baseline"] = np.full(len(test), bundle["development_prevalence"])
     scores["random_guess"] = np.random.default_rng(cfg["seed"] + 300).uniform(size=len(test))
     p = prediction_table(test, cfg, scores, frozen["rsbi_column"])
-    p.to_csv(out / "FINAL_test_predictions_for_D.csv", index=False)
+    p.to_csv(out / "FINAL_test_predictions.csv", index=False)
     table = comparison_tables(p, frozen["thresholds"])
     table.to_csv(out / "FINAL_test_metrics.csv", index=False)
     plot_comparison(p, out, "FINAL_test")
@@ -605,13 +592,13 @@ def final_evaluation(run, enabled=False):
         ci.to_csv(out / "FINAL_test_patient_bootstrap_CI.csv", index=False)
         differences.to_csv(out / "FINAL_paired_difference_XGB_minus_LR_CI.csv", index=False)
     else:
-        warnings.warn("Test set has one outcome class or bootstrap disabled; AUROC/intervals may be unavailable. Do not repair this by changing the test set after seeing results.")
-    # Simple error/subgroup summaries for D; no threshold re-optimisation by subgroup.
+        warnings.warn("Test set has one outcome class or bootstrap is disabled; AUROC or intervals may be unavailable.")
+    # Apply the same frozen thresholds to error and subgroup summaries.
     for name in MODEL_NAMES:
         p[name + "_predicted_failure"] = (p[name] >= frozen["thresholds"][name]).astype(int)
         p[name + "_error"] = np.select([(p.y_true == 1) & (p[name + "_predicted_failure"] == 0),
             (p.y_true == 0) & (p[name + "_predicted_failure"] == 1)], ["false_negative", "false_positive"], default="correct")
-    p.to_csv(out / "FINAL_test_error_analysis_for_D.csv", index=False)
+    p.to_csv(out / "FINAL_test_error_analysis.csv", index=False)
     subgroup_rows = []
     for col in ["gender", "sex"]:
         if col in p:
