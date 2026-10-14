@@ -2,18 +2,18 @@
 
 Predicting 48-hour extubation failure using MIMIC-IV v3.1.
 
-- `data/report(4).ipynb`: cohort and feature extraction.
-- `models/Model Training.ipynb`: modelling and evaluation.
-- `models/requirements.txt`: pinned modelling dependencies, tested with Python 3.12.
+- `data/data.ipynb`: cohort and feature extraction.
+- `models/Model Training.ipynb`: logistic regression, XGBoost and evaluation. Package versions and settings are listed inside.
 
-Install the dependencies, then run the modelling notebook from top to bottom. Edit only `CONFIG`.
+Open the modelling notebook and run it from top to bottom:
+1. Use `mode="trial"` to test the real-data workflow with reduced tuning.
+2. Use `mode="main"` for 5 outer / 3 inner folds.
+3. Set `run_final_test=True` only after all analysis choices are fixed.
 
-- `check`: tests the complete pipeline on synthetic data.
-- `trial` (default): reduced tuning on real development patients; test sets remain closed.
-- `main`: full 5×3 nested CV. Enable `run_final_test` after all choices are fixed.
+The main analysis uses `data/average_6h_filtered_dataset.csv`. Sensitivity analyses use `average_6h_full_dataset.csv` and the last available hourly summaries in `clean_full_final.csv`. `average_6h_coverage.csv` validates missingness and cohort membership; it is not a model input.
 
-The notebook runs the filtered six-hour main analysis, full-cohort sensitivity analysis and an optional filtered last-hour ablation. Each has a separate folder under `models/outputs/<mode>/`, with combined comparison tables in the mode folder.
+**Temporal metadata are still needed:** add `extubation_time`, `anchor_year` and `anchor_year_group` to both averaged CSVs, or supply a CSV keyed by `subject_id` through `metadata_csv`. Include `stay_id` to verify the index event. The current exports omit these fields.
 
-Real runs use `data/clean_final_dataset.csv` and `data/clean_full_final.csv` before median imputation or splitting. Both need one row per patient and temporal metadata (`extubation_time`, `anchor_year`, `anchor_year_group`). The last-hour ablation requires matching hourly-bin predictors. The missingness filter and other eligibility rules belong to the extraction stage.
+Outputs go to `models/outputs/<mode>/`, including metrics, confidence intervals, calibration and XGBoost SHAP importance plots. Small test-event counts produce a warning; they do not remove patients or skip evaluation.
 
-For submission, combine extraction and modelling into the required `ML4Health_report_25.ipynb`. Declare AI assistance as required by the course.
+For submission, combine extraction and modelling in `ML4Health_report_25.ipynb` and complete the generative AI declaration.
