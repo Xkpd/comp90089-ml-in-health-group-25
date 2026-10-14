@@ -1,0 +1,37 @@
+feature,mean_abs_shap_log_odds
+numeric__icu_hours_before_extubation,0.7562286
+categorical__icu_type_at_admission_Cardiac Vascular Intensive Care Unit (CVICU),0.48358417
+numeric__admission_age,0.25295293
+numeric__peep_mean_6h,0.18868901
+numeric__resp_rate_mean_6h,0.18291979
+numeric__heart_rate_mean_6h,0.17803068
+numeric__minute_volume_mean_6h,0.116662614
+numeric__spo2_mean_6h,0.09895587
+numeric__ph_mean_6h,0.09595424
+numeric__temperature_mean_6h,0.08774154
+numeric__tidal_volume_spontaneous_mean_6h,0.08237051
+numeric__po2_mean_6h,0.08141881
+numeric__hospital_hours_before_extubation,0.07112216
+numeric__lactate_mean_6h,0.06462761
+numeric__respiratory_rate_spontaneous_mean_6h,0.057126693
+numeric__mbp_mean_6h,0.051914897
+numeric__tidal_volume_observed_mean_6h,0.044457853
+numeric__fio2_chartevents_mean_6h,0.04435989
+numeric__RSBI_mean_6h,0.04358573
+numeric__pco2_mean_6h,0.037049092
+categorical__icu_type_at_admission_Trauma SICU (TSICU),0.030423792
+categorical__icu_type_at_admission_Medical/Surgical Intensive Care Unit (MICU/SICU),0.024231441
+categorical__icu_type_at_admission_Neuro Surgical Intensive Care Unit (Neuro SICU),0.022190811
+categorical__icu_type_at_admission_Surgical Intensive Care Unit (SICU),0.013116663
+categorical__icu_type_at_admission_Medical Intensive Care Unit (MICU),0.0029423058
+numeric__pao2fio2ratio_mean_6h,0.0022710369
+categorical__gender_M,0.0014233611
+categorical__icu_type_at_admission_Coronary Care Unit (CCU),0.0006010171
+numeric__fio2_mean_6h,0.00026360172
+categorical__gender_F,0.000133832
+categorical__icu_type_at_admission_Intensive Care Unit (ICU),0.0
+categorical__icu_type_at_admission_Med/Surg,0.0
+categorical__icu_type_at_admission_Neuro Intermediate,0.0
+categorical__icu_type_at_admission_Neuro Stepdown,0.0
+categorical__icu_type_at_admission_PACU,0.0
+numeric__bicarbonate_mean_6h,0.0

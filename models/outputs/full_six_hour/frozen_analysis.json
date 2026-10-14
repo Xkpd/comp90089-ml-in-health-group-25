@@ -1,0 +1,178 @@
+{
+  "config": {
+    "coverage_csv": "/Users/xingkun/Desktop/machine learning for health/Group project/data/average_6h_coverage.csv",
+    "last_hour_csv": "/Users/xingkun/Desktop/machine learning for health/Group project/data/clean_full_final.csv",
+    "metadata_csv": null,
+    "target": "combined_outcome",
+    "seed": 42,
+    "split_mode": "temporal",
+    "temporal_cutoff": 2020,
+    "min_test_events": 20,
+    "feature_columns": [
+      "admission_age",
+      "icu_hours_before_extubation",
+      "hospital_hours_before_extubation",
+      "heart_rate_mean_6h",
+      "mbp_mean_6h",
+      "resp_rate_mean_6h",
+      "temperature_mean_6h",
+      "spo2_mean_6h",
+      "respiratory_rate_spontaneous_mean_6h",
+      "tidal_volume_spontaneous_mean_6h",
+      "tidal_volume_observed_mean_6h",
+      "minute_volume_mean_6h",
+      "peep_mean_6h",
+      "fio2_chartevents_mean_6h",
+      "RSBI_mean_6h",
+      "ph_mean_6h",
+      "pco2_mean_6h",
+      "po2_mean_6h",
+      "bicarbonate_mean_6h",
+      "lactate_mean_6h",
+      "fio2_mean_6h",
+      "pao2fio2ratio_mean_6h",
+      "gender",
+      "icu_type_at_admission"
+    ],
+    "categorical_columns": [
+      "gender",
+      "sex",
+      "first_careunit",
+      "icu_type_at_admission"
+    ],
+    "rsbi_column": null,
+    "negative_followup_policy": "retain_recorded_labels",
+    "outer_folds": 5,
+    "inner_folds": 3,
+    "lr_c_values": [
+      0.001,
+      0.01,
+      0.1,
+      1,
+      10,
+      100
+    ],
+    "lr_max_iter": 3000,
+    "xgb_param_grid": {
+      "n_estimators": [
+        200,
+        400
+      ],
+      "max_depth": [
+        2,
+        3,
+        4
+      ],
+      "learning_rate": [
+        0.03,
+        0.1
+      ],
+      "min_child_weight": [
+        1,
+        5
+      ],
+      "reg_lambda": [
+        1,
+        10
+      ]
+    },
+    "xgb_subsample": 0.8,
+    "xgb_colsample_bytree": 0.8,
+    "xgb_threads": 4,
+    "calibrate": true,
+    "calibration_method": "sigmoid",
+    "sensitivity_target": 0.8,
+    "decision_curve_max_threshold": 0.3,
+    "bootstrap_replicates": 1000,
+    "pipeline_version": "six-hour-means-4",
+    "suite_output_dir": "/Users/xingkun/Desktop/machine learning for health/Group project/models/outputs",
+    "analysis": "full_six_hour",
+    "feature_set": "six_hour",
+    "data_csv": "/Users/xingkun/Desktop/machine learning for health/Group project/data/average_6h_full_dataset.csv",
+    "output_dir": "/Users/xingkun/Desktop/machine learning for health/Group project/models/outputs/full_six_hour"
+  },
+  "source_hashes": {
+    "data_csv_sha256": "8e6c10fb46ec8f80b21e39ef2c95bf3af089cc05ff221bc538bb8b006949ba16",
+    "coverage_csv_sha256": "6b25a30c219956a6fe16ff59602fca7190e8db29ee1909473fbf306069e37f14"
+  },
+  "split": {
+    "mode": "temporal",
+    "cutoff": 2020,
+    "rule": "development: upper possible year < cutoff; test: lower possible year >= cutoff; overlapping intervals excluded",
+    "cutoff_choice": "explicit, chosen without model performance"
+  },
+  "selected_features": [
+    "admission_age",
+    "icu_hours_before_extubation",
+    "hospital_hours_before_extubation",
+    "heart_rate_mean_6h",
+    "mbp_mean_6h",
+    "resp_rate_mean_6h",
+    "temperature_mean_6h",
+    "spo2_mean_6h",
+    "respiratory_rate_spontaneous_mean_6h",
+    "tidal_volume_spontaneous_mean_6h",
+    "tidal_volume_observed_mean_6h",
+    "minute_volume_mean_6h",
+    "peep_mean_6h",
+    "fio2_chartevents_mean_6h",
+    "RSBI_mean_6h",
+    "ph_mean_6h",
+    "pco2_mean_6h",
+    "po2_mean_6h",
+    "bicarbonate_mean_6h",
+    "lactate_mean_6h",
+    "fio2_mean_6h",
+    "pao2fio2ratio_mean_6h",
+    "gender",
+    "icu_type_at_admission"
+  ],
+  "rsbi_column": "RSBI_mean_6h",
+  "partition_counts": {
+    "development": 17034,
+    "test": 1093,
+    "ambiguous_time": 894
+  },
+  "holdout": {
+    "test_patients": 1093,
+    "test_events": 163,
+    "test_non_events": 930,
+    "small_sample_warning": false,
+    "rule": "warn below 20 events or non-events; retain all test patients"
+  },
+  "thresholds": {
+    "logistic_regression": 0.10320652976031229,
+    "xgboost": 0.1002080299381977,
+    "prevalence_baseline": 0.5,
+    "random_guess": 0.5
+  },
+  "threshold_rule": "maximum specificity at development OOF sensitivity >= configured target; exploratory, not clinically validated",
+  "selected_primary_model": "xgboost",
+  "selection_rule": "highest mean outer-fold AUROC, before final test",
+  "mean_outer_fold_auroc": {
+    "xgboost": 0.8485740596645556,
+    "logistic_regression": 0.8211543302018297
+  },
+  "final_parameters": {
+    "logistic_regression": {
+      "model__C": 0.1
+    },
+    "xgboost": {
+      "model__learning_rate": 0.03,
+      "model__max_depth": 4,
+      "model__min_child_weight": 5,
+      "model__n_estimators": 400,
+      "model__reg_lambda": 10
+    }
+  },
+  "development_n": 17034,
+  "development_events": 2059,
+  "development_followup": {
+    "followup_field": "hospital_observed_48h",
+    "patients": 17034,
+    "negative_labels_without_complete_observation": 672,
+    "known_events_without_complete_observation": 1222,
+    "policy": "retain_recorded_labels"
+  },
+  "test_outcomes_used_for_training_or_selection": false
+}

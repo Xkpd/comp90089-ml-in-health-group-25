@@ -1,0 +1,7 @@
+{
+  "followup_field": "hospital_observed_48h",
+  "patients": 17034,
+  "negative_labels_without_complete_observation": 672,
+  "known_events_without_complete_observation": 1222,
+  "policy": "retain_recorded_labels"
+}
