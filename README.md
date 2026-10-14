@@ -1,8 +1,8 @@
 # COMP90089 Group 25
 
-Code for our Machine Learning for Health group project on predicting extubation outcomes using MIMIC-IV data.
+Machine Learning for Health group project on predicting extubation outcomes using MIMIC-IV data.
 
-## Main files
+## files
 
 - `data/report(4).ipynb` — data extraction and preparation
 - `section_c/Section_C_Model_Training.ipynb` — model training
@@ -16,6 +16,3 @@ Use Python 3.12 and install the required packages:
 pip install -r section_c/requirements.txt
 ```
 
-The dataset is not included. Place `clean_final_dataset.csv` in the `data` folder.
-
-Please do not upload patient data, credentials, or notebook outputs to GitHub.
