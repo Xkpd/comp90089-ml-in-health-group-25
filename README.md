@@ -3,17 +3,18 @@
 Predicting 48-hour extubation failure using MIMIC-IV v3.1.
 
 - `data/data.ipynb`: cohort and feature extraction.
-- `models/Model Training.ipynb`: logistic regression, XGBoost and evaluation. Package versions and settings are listed inside.
+- `models/Model Training.ipynb`: modelling and evaluation.
 
-Open the modelling notebook and run it from top to bottom:
-1. Use `mode="trial"` to test the real-data workflow with reduced tuning.
-2. Use `mode="main"` for 5 outer / 3 inner folds.
-3. Set `run_final_test=True` only after all analysis choices are fixed.
+Run the modelling notebook top to bottom (5 outer / 3 inner folds). Run first with `run_final_test=False` and check the development results; then set `run_final_test=True` and rerun to score the temporal test with the saved models. Each run records package versions.
 
-The main analysis uses `data/average_6h_filtered_dataset.csv`. Sensitivity analyses use `average_6h_full_dataset.csv` and the last available hourly summaries in `clean_full_final.csv`. `average_6h_coverage.csv` validates missingness and cohort membership; it is not a model input.
+The primary analysis uses `average_6h_filtered_dataset.csv`. Prespecified sensitivities use the full cohort and last-hour summaries on the same main-cohort patients. Coverage is validation-only. The averaged CSVs include the temporal metadata needed for splitting.
 
-**Temporal metadata are still needed:** add `extubation_time`, `anchor_year` and `anchor_year_group` to both averaged CSVs, or supply a CSV keyed by `subject_id` through `metadata_csv`. Include `stay_id` to verify the index event. The current exports omit these fields.
+Each section prints its key tables and figures and saves them in `models/outputs/` (combined tables and figures) and `models/outputs/<analysis>/` (per-analysis CSVs):
 
-Outputs go to `models/outputs/<mode>/`, including metrics, confidence intervals, calibration and XGBoost SHAP importance plots. Small test-event counts produce a warning; they do not remove patients or skip evaluation.
+- Study timeline and Table 1 (development patients by outcome and missingness-filter membership).
+- Development performance with 95% CIs, AUROC forest plot, primary calibration and decision curve.
+- Paired XGBoost–LR and six-hour–last-hour differences, missingness-filter robustness, subgroups.
+- LR coefficient and XGBoost SHAP figure (primary development patients).
+- After the test is opened: development-versus-test Table 1, test performance and forest plot, test calibration and decision curve, RSBI comparison, exploratory subgroups and errors.
 
 For submission, combine extraction and modelling in `ML4Health_report_25.ipynb` and complete the generative AI declaration.
