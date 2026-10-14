@@ -28,26 +28,3 @@ credentials*.json
 # Local backup of notebooks with outputs
 .local-backups/
 
-# Share notebooks in data/, but keep datasets local
-/data/*
-!/data/*.ipynb
-
-# Patient data and generated model files, wherever saved
-*.csv
-*.tsv
-*.parquet
-*.feather
-*.arrow
-*.h5
-*.hdf5
-*.sqlite
-*.sqlite3
-*.db
-*.csv.gz
-*.tsv.gz
-*.pkl
-*.pickle
-*.joblib
-*.npy
-*.npz
-outputs/
