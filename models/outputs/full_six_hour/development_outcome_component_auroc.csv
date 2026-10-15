@@ -1,7 +1,0 @@
-component,model,events,non_events,auroc
-death_within_48_hours,logistic_regression,1218,14975,0.8954276832487643
-death_within_48_hours,xgboost,1218,14975,0.9310648014890719
-death_within_48_hours,rsbi,416,11040,0.5717655858068562
-reintubation_within_48_hours,logistic_regression,862,14975,0.7137251955114673
-reintubation_within_48_hours,xgboost,862,14975,0.7279815547180335
-reintubation_within_48_hours,rsbi,724,11040,0.5596316008087117

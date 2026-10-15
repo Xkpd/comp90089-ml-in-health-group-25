@@ -1,7 +1,0 @@
-model,metric,patients,events,six_hour,last_hour,six_hour_minus_last_hour,lower_95,upper_95,valid_replicates,interpretation
-logistic_regression,auroc,15493,1503,0.8108471643798418,0.8045181973436972,0.006328967036144606,0.00254470905232555,0.01024241675256116,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours
-logistic_regression,average_precision,15493,1503,0.3682444795430725,0.35134452601013716,0.01689995353293533,0.009255940389707,0.024465985322080466,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours
-logistic_regression,brier,15493,1503,0.07364799761277474,0.07485667203668968,-0.0012086744239149377,-0.0016740920778404145,-0.0007611720192445409,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours
-xgboost,auroc,15493,1503,0.8264067052932496,0.8228550285656944,0.0035516767275551864,-6.803225776273455e-05,0.007277002872195698,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours
-xgboost,average_precision,15493,1503,0.42054967171509294,0.4080324782043053,0.012517193510787616,0.0042557235001682,0.020524228302700905,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours
-xgboost,brier,15493,1503,0.07116523752886779,0.07192903414813502,-0.0007637966192672319,-0.0012367771821390871,-0.0003210075282702602,1000,paired patients; positive AUROC/AP or negative Brier differences favour six hours

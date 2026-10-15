@@ -1,0 +1,7 @@
+analysis,model,development_patients,development_events,outer_fold_auroc_mean,outer_fold_auroc_sd,selected,threshold,final_hyperparameters
+filtered_six_hour,logistic_regression,15493,1503,0.8116012655772951,0.012951273597200162,False,0.08260975724745229,{'C': 0.1}
+filtered_six_hour,xgboost,15493,1503,0.8265718449422422,0.010899301693356723,True,0.08321523879825587,"{'learning_rate': 0.03, 'max_depth': 3, 'min_child_weight': 5, 'n_estimators': 400, 'reg_lambda': 10}"
+full_six_hour,logistic_regression,17034,2059,0.8211543302018297,0.01499827876216825,False,0.10320652976031229,{'C': 0.1}
+full_six_hour,xgboost,17034,2059,0.8485740596645556,0.010799033467947979,True,0.1002080299381977,"{'learning_rate': 0.03, 'max_depth': 4, 'min_child_weight': 5, 'n_estimators': 400, 'reg_lambda': 10}"
+filtered_last_hour,logistic_regression,15493,1503,0.8053889410012054,0.014871869351071997,False,0.08244987604866416,{'C': 1}
+filtered_last_hour,xgboost,15493,1503,0.8231030794817054,0.011928263906992987,True,0.08296903795303529,"{'learning_rate': 0.03, 'max_depth': 3, 'min_child_weight': 5, 'n_estimators': 400, 'reg_lambda': 10}"

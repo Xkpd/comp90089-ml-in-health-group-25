@@ -84,7 +84,7 @@
     "sensitivity_target": 0.8,
     "decision_curve_max_threshold": 0.3,
     "bootstrap_replicates": 1000,
-    "pipeline_version": "six-hour-means-4",
+    "pipeline_version": "six-hour-means-5",
     "suite_output_dir": "/Users/xingkun/Desktop/machine learning for health/Group project/models/outputs",
     "analysis": "filtered_six_hour",
     "feature_set": "six_hour",
@@ -146,13 +146,121 @@
     "prevalence_baseline": 0.5,
     "random_guess": 0.5
   },
-  "threshold_rule": "maximum specificity at development OOF sensitivity >= configured target; exploratory, not clinically validated",
+  "threshold_rule": "maximum specificity at development OOF sensitivity >= configured target",
   "selected_primary_model": "xgboost",
   "selection_rule": "highest mean outer-fold AUROC, before final test",
-  "mean_outer_fold_auroc": {
-    "xgboost": 0.8265718449422422,
-    "logistic_regression": 0.8116012655772948
+  "outer_fold_auroc": {
+    "logistic_regression": [
+      0.7909873925133994,
+      0.8190081192308697,
+      0.8237029772096348,
+      0.8074588992137239,
+      0.8168489397188468
+    ],
+    "xgboost": [
+      0.8089190427904126,
+      0.8342907487312959,
+      0.8349770481525722,
+      0.8233261853705025,
+      0.8313461996664284
+    ]
   },
+  "mean_outer_fold_auroc": {
+    "logistic_regression": 0.8116012655772951,
+    "xgboost": 0.8265718449422422
+  },
+  "outer_fold_parameters": [
+    {
+      "outer_fold": 0,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 0.01
+      }
+    },
+    {
+      "outer_fold": 0,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 4,
+        "model__min_child_weight": 1,
+        "model__n_estimators": 200,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 3,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 4,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 200,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 1
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 2,
+        "model__min_child_weight": 1,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 2,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    }
+  ],
   "final_parameters": {
     "logistic_regression": {
       "model__C": 0.1
