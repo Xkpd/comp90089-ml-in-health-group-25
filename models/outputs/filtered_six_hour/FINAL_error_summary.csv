@@ -1,0 +1,5 @@
+model,error,patients,death_within_48_hours,reintubation_within_48_hours
+logistic_regression,missed failure (false negative),10,4,8
+logistic_regression,false alert (false positive),318,0,0
+xgboost,missed failure (false negative),14,4,11
+xgboost,false alert (false positive),339,0,0

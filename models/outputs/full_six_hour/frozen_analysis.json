@@ -84,7 +84,7 @@
     "sensitivity_target": 0.8,
     "decision_curve_max_threshold": 0.3,
     "bootstrap_replicates": 1000,
-    "pipeline_version": "six-hour-means-5",
+    "pipeline_version": "six-hour-means-6",
     "suite_output_dir": "/Users/xingkun/Desktop/machine learning for health/Group project/models/outputs",
     "analysis": "full_six_hour",
     "feature_set": "six_hour",
