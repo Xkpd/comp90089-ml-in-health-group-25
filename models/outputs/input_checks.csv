@@ -1,4 +1,0 @@
-,patients,development_patients,development_events,test_patients,test_events,test_non_events,small_holdout_warning,excluded_ambiguous_year,predictors,events_per_predictor,values_outside_plausible_range,rsbi_comparator,outer_folds,inner_folds,calibration,development_negatives_without_complete_followup
-filtered_six_hour,17146,15493,1503,897,106,791,False,756,24,62.62,161,RSBI_mean_6h,5,3,sigmoid,496
-full_six_hour,19021,17034,2059,1093,163,930,False,894,24,85.79,172,RSBI_mean_6h,5,3,sigmoid,672
-filtered_last_hour,17146,15493,1503,897,106,791,False,756,24,62.62,212,RSBI_bin_5,5,3,sigmoid,496
