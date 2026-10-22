@@ -1,0 +1,12 @@
+{
+  "analysis_signature": "1f9b852b98fc846aba3c4bf9db9f99ecfd22cc090cac7c47019a8600b2841a7e",
+  "model_sha256": "2651a6e4662d8388e6af75b119b88651f37718b71de017ecc1f8f0dc3fe70319",
+  "holdout": {
+    "test_patients": 897,
+    "test_events": 106,
+    "test_non_events": 791,
+    "small_sample_warning": false,
+    "rule": "warn below 20 events or non-events; retain all test patients"
+  },
+  "status": "completed"
+}

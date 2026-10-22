@@ -1,0 +1,236 @@
+{
+  "status": "completed",
+  "primary_analysis": "filtered_six_hour",
+  "plan": {
+    "analyses": {
+      "filtered_six_hour": {
+        "config": {
+          "coverage_csv": "in_memory",
+          "metadata_csv": null,
+          "analysis_note": "Revised temporal-test analysis; untuned comparisons added after an earlier test evaluation.",
+          "target": "combined_outcome",
+          "seed": 42,
+          "split_mode": "temporal",
+          "temporal_cutoff": 2020,
+          "min_test_events": 20,
+          "feature_columns": [
+            "admission_age",
+            "icu_hours_before_extubation",
+            "hospital_hours_before_extubation",
+            "heart_rate_mean_6h",
+            "mbp_mean_6h",
+            "resp_rate_mean_6h",
+            "temperature_mean_6h",
+            "spo2_mean_6h",
+            "respiratory_rate_spontaneous_mean_6h",
+            "tidal_volume_spontaneous_mean_6h",
+            "tidal_volume_observed_mean_6h",
+            "minute_volume_mean_6h",
+            "peep_mean_6h",
+            "fio2_chartevents_mean_6h",
+            "RSBI_mean_6h",
+            "ph_mean_6h",
+            "pco2_mean_6h",
+            "po2_mean_6h",
+            "bicarbonate_mean_6h",
+            "lactate_mean_6h",
+            "fio2_mean_6h",
+            "pao2fio2ratio_mean_6h",
+            "gender",
+            "icu_type_at_admission"
+          ],
+          "categorical_columns": [
+            "gender",
+            "sex",
+            "first_careunit",
+            "icu_type_at_admission"
+          ],
+          "rsbi_column": null,
+          "negative_followup_policy": "retain_recorded_labels",
+          "outer_folds": 5,
+          "inner_folds": 3,
+          "lr_c_values": [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10,
+            100
+          ],
+          "lr_max_iter": 3000,
+          "lr_fixed_c": 1.0,
+          "xgb_fixed_params": {
+            "n_estimators": 250,
+            "max_depth": 3,
+            "learning_rate": 0.05,
+            "min_child_weight": 1,
+            "reg_lambda": 1
+          },
+          "xgb_param_grid": {
+            "n_estimators": [
+              200,
+              400
+            ],
+            "max_depth": [
+              2,
+              3,
+              4
+            ],
+            "learning_rate": [
+              0.03,
+              0.1
+            ],
+            "min_child_weight": [
+              1,
+              5
+            ],
+            "reg_lambda": [
+              1,
+              10
+            ]
+          },
+          "xgb_subsample": 0.8,
+          "xgb_colsample_bytree": 0.8,
+          "xgb_threads": 4,
+          "calibrate": true,
+          "calibration_method": "sigmoid",
+          "sensitivity_target": 0.8,
+          "decision_curve_max_threshold": 0.3,
+          "bootstrap_replicates": 1000,
+          "pipeline_version": "six-hour-tuning-comparison-in-memory-1",
+          "suite_output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory",
+          "analysis": "filtered_six_hour",
+          "data_csv": "filtered",
+          "output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory\\filtered_six_hour"
+        },
+        "source_hashes": {
+          "data_frame_sha256": "fccf8520eecd56577fb87703f99e2f207cc798cf42f4dd86939f4c78f67ee30e",
+          "coverage_frame_sha256": "e9455dca013d3896684c4e11efd6a0dc89699dbabeb026eaa9250c36716d0bc4"
+        }
+      },
+      "full_six_hour": {
+        "config": {
+          "coverage_csv": "in_memory",
+          "metadata_csv": null,
+          "analysis_note": "Revised temporal-test analysis; untuned comparisons added after an earlier test evaluation.",
+          "target": "combined_outcome",
+          "seed": 42,
+          "split_mode": "temporal",
+          "temporal_cutoff": 2020,
+          "min_test_events": 20,
+          "feature_columns": [
+            "admission_age",
+            "icu_hours_before_extubation",
+            "hospital_hours_before_extubation",
+            "heart_rate_mean_6h",
+            "mbp_mean_6h",
+            "resp_rate_mean_6h",
+            "temperature_mean_6h",
+            "spo2_mean_6h",
+            "respiratory_rate_spontaneous_mean_6h",
+            "tidal_volume_spontaneous_mean_6h",
+            "tidal_volume_observed_mean_6h",
+            "minute_volume_mean_6h",
+            "peep_mean_6h",
+            "fio2_chartevents_mean_6h",
+            "RSBI_mean_6h",
+            "ph_mean_6h",
+            "pco2_mean_6h",
+            "po2_mean_6h",
+            "bicarbonate_mean_6h",
+            "lactate_mean_6h",
+            "fio2_mean_6h",
+            "pao2fio2ratio_mean_6h",
+            "gender",
+            "icu_type_at_admission"
+          ],
+          "categorical_columns": [
+            "gender",
+            "sex",
+            "first_careunit",
+            "icu_type_at_admission"
+          ],
+          "rsbi_column": null,
+          "negative_followup_policy": "retain_recorded_labels",
+          "outer_folds": 5,
+          "inner_folds": 3,
+          "lr_c_values": [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10,
+            100
+          ],
+          "lr_max_iter": 3000,
+          "lr_fixed_c": 1.0,
+          "xgb_fixed_params": {
+            "n_estimators": 250,
+            "max_depth": 3,
+            "learning_rate": 0.05,
+            "min_child_weight": 1,
+            "reg_lambda": 1
+          },
+          "xgb_param_grid": {
+            "n_estimators": [
+              200,
+              400
+            ],
+            "max_depth": [
+              2,
+              3,
+              4
+            ],
+            "learning_rate": [
+              0.03,
+              0.1
+            ],
+            "min_child_weight": [
+              1,
+              5
+            ],
+            "reg_lambda": [
+              1,
+              10
+            ]
+          },
+          "xgb_subsample": 0.8,
+          "xgb_colsample_bytree": 0.8,
+          "xgb_threads": 4,
+          "calibrate": true,
+          "calibration_method": "sigmoid",
+          "sensitivity_target": 0.8,
+          "decision_curve_max_threshold": 0.3,
+          "bootstrap_replicates": 1000,
+          "pipeline_version": "six-hour-tuning-comparison-in-memory-1",
+          "suite_output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory",
+          "analysis": "full_six_hour",
+          "data_csv": "full",
+          "output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory\\full_six_hour"
+        },
+        "source_hashes": {
+          "data_frame_sha256": "0e2f4cb1bd69230a778709039be9a2fadeba59c6db9b294fc87b47952606cfe1",
+          "coverage_frame_sha256": "e9455dca013d3896684c4e11efd6a0dc89699dbabeb026eaa9250c36716d0bc4"
+        }
+      }
+    },
+    "environment": {
+      "numpy": "2.3.1",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.9.0",
+      "xgboost": "3.2.0",
+      "scipy": "1.16.0",
+      "matplotlib": "3.10.3",
+      "joblib": "1.5.1",
+      "python": "3.13.5"
+    }
+  },
+  "model_hashes": {
+    "filtered_six_hour": "2651a6e4662d8388e6af75b119b88651f37718b71de017ecc1f8f0dc3fe70319",
+    "full_six_hour": "1450157d697259f37c9757edf2b15dfbd507e29432e0b47a732a4e72c69f9951"
+  },
+  "analysis_hashes": {
+    "filtered_six_hour": "882c202dabccceaa9d9fcc213b62ca0c5c2e6dc382bf4e9ab04e111afe1b2e73",
+    "full_six_hour": "da57fb807b5ad957e5d1bb1342e513d426f394150c5943cc7d260bac07321569"
+  }
+}
