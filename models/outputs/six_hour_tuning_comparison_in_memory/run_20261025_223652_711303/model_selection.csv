@@ -1,0 +1,9 @@
+analysis,model,tuned,development_patients,development_events,outer_fold_auroc_mean,outer_fold_auroc_sd,selected,threshold,final_hyperparameters
+filtered_six_hour,logistic_regression,True,15241,1402,0.806818973213159,0.015760050223130224,False,0.07576526424621627,{'C': 0.1}
+filtered_six_hour,logistic_regression_untuned,False,15241,1402,0.8069803955738724,0.01561492840023262,False,0.07630962649437766,{'C': 1.0}
+filtered_six_hour,xgboost,True,15241,1402,0.8199418706866762,0.01185227935640435,True,0.07523846735974347,"{'learning_rate': 0.03, 'max_depth': 4, 'min_child_weight': 5, 'n_estimators': 200, 'reg_lambda': 10}"
+filtered_six_hour,xgboost_untuned,False,15241,1402,0.8171159466335711,0.010563949484732214,False,0.0720414000513472,"{'n_estimators': 250, 'max_depth': 3, 'learning_rate': 0.05, 'min_child_weight': 1, 'reg_lambda': 1}"
+full_six_hour,logistic_regression,True,16685,1888,0.8189187601352709,0.004843856164594459,False,0.0955330096293127,{'C': 0.1}
+full_six_hour,logistic_regression_untuned,False,16685,1888,0.8189875173970161,0.004836131008210253,False,0.09557126893896761,{'C': 1.0}
+full_six_hour,xgboost,True,16685,1888,0.8441476379407413,0.0071775733505830075,True,0.09421875152739932,"{'learning_rate': 0.1, 'max_depth': 2, 'min_child_weight': 1, 'n_estimators': 200, 'reg_lambda': 10}"
+full_six_hour,xgboost_untuned,False,16685,1888,0.8439832902446669,0.008336479175273666,False,0.0952782463284371,"{'n_estimators': 250, 'max_depth': 3, 'learning_rate': 0.05, 'min_child_weight': 1, 'reg_lambda': 1}"

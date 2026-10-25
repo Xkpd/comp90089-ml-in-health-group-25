@@ -1,0 +1,403 @@
+{
+  "config": {
+    "analysis_note": "We kept the primary analysis unchanged after test inspection; full-cohort sensitivity and untuned comparisons are exploratory.",
+    "target": "combined_outcome",
+    "seed": 42,
+    "split_mode": "temporal",
+    "temporal_cutoff": 2020,
+    "min_test_events": 20,
+    "feature_columns": [
+      "admission_age",
+      "icu_hours_before_extubation",
+      "hospital_hours_before_extubation",
+      "heart_rate_mean_6h",
+      "mbp_mean_6h",
+      "resp_rate_mean_6h",
+      "temperature_mean_6h",
+      "spo2_mean_6h",
+      "respiratory_rate_spontaneous_mean_6h",
+      "tidal_volume_spontaneous_mean_6h",
+      "tidal_volume_observed_mean_6h",
+      "minute_volume_mean_6h",
+      "peep_mean_6h",
+      "fio2_chartevents_mean_6h",
+      "RSBI_mean_6h",
+      "ph_mean_6h",
+      "pco2_mean_6h",
+      "po2_mean_6h",
+      "bicarbonate_mean_6h",
+      "lactate_mean_6h",
+      "fio2_mean_6h",
+      "pao2fio2ratio_mean_6h",
+      "gender",
+      "icu_type_at_admission"
+    ],
+    "categorical_columns": [
+      "gender",
+      "sex",
+      "first_careunit",
+      "icu_type_at_admission"
+    ],
+    "rsbi_column": null,
+    "negative_followup_policy": "retain_recorded_labels",
+    "outer_folds": 5,
+    "inner_folds": 3,
+    "lr_c_values": [
+      0.001,
+      0.01,
+      0.1,
+      1,
+      10,
+      100
+    ],
+    "lr_max_iter": 3000,
+    "lr_fixed_c": 1.0,
+    "xgb_fixed_params": {
+      "n_estimators": 250,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "min_child_weight": 1,
+      "reg_lambda": 1
+    },
+    "xgb_param_grid": {
+      "n_estimators": [
+        200,
+        400
+      ],
+      "max_depth": [
+        2,
+        3,
+        4
+      ],
+      "learning_rate": [
+        0.03,
+        0.1
+      ],
+      "min_child_weight": [
+        1,
+        5
+      ],
+      "reg_lambda": [
+        1,
+        10
+      ]
+    },
+    "xgb_subsample": 0.8,
+    "xgb_colsample_bytree": 0.8,
+    "xgb_threads": 4,
+    "calibrate": true,
+    "calibration_method": "sigmoid",
+    "sensitivity_target": 0.8,
+    "decision_curve_max_threshold": 0.3,
+    "bootstrap_replicates": 1000,
+    "suite_output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory\\run_20261025_223652_711303",
+    "analysis": "full_six_hour",
+    "cohort": "full",
+    "output_dir": "c:\\Users\\22110\\Documents\\Machine Learning Applications for Health\\comp90089-ml-in-health-group-25\\models\\outputs\\six_hour_tuning_comparison_in_memory\\run_20261025_223652_711303\\full_six_hour"
+  },
+  "split": {
+    "mode": "temporal",
+    "cutoff": 2020,
+    "rule": "development: upper possible year < cutoff; test: lower possible year >= cutoff; overlapping intervals excluded",
+    "cutoff_choice": "explicit, chosen without model performance"
+  },
+  "selected_features": [
+    "admission_age",
+    "icu_hours_before_extubation",
+    "hospital_hours_before_extubation",
+    "heart_rate_mean_6h",
+    "mbp_mean_6h",
+    "resp_rate_mean_6h",
+    "temperature_mean_6h",
+    "spo2_mean_6h",
+    "respiratory_rate_spontaneous_mean_6h",
+    "tidal_volume_spontaneous_mean_6h",
+    "tidal_volume_observed_mean_6h",
+    "minute_volume_mean_6h",
+    "peep_mean_6h",
+    "fio2_chartevents_mean_6h",
+    "RSBI_mean_6h",
+    "ph_mean_6h",
+    "pco2_mean_6h",
+    "po2_mean_6h",
+    "bicarbonate_mean_6h",
+    "lactate_mean_6h",
+    "fio2_mean_6h",
+    "pao2fio2ratio_mean_6h",
+    "gender",
+    "icu_type_at_admission"
+  ],
+  "rsbi_column": "RSBI_mean_6h",
+  "partition_counts": {
+    "development": 16685,
+    "test": 1064,
+    "ambiguous_time": 871
+  },
+  "holdout": {
+    "test_patients": 1064,
+    "test_events": 146,
+    "test_non_events": 918,
+    "small_sample_warning": false,
+    "rule": "warn below 20 events or non-events; retain all test patients"
+  },
+  "thresholds": {
+    "logistic_regression": 0.0955330096293127,
+    "logistic_regression_untuned": 0.09557126893896761,
+    "xgboost": 0.09421875152739932,
+    "xgboost_untuned": 0.0952782463284371,
+    "random_guess": 0.5
+  },
+  "threshold_rule": "maximum specificity at development OOF sensitivity >= configured target",
+  "selected_primary_model": "xgboost",
+  "selection_rule": "highest mean outer-fold AUROC among tuned models",
+  "outer_fold_auroc": {
+    "logistic_regression": [
+      0.818890243028174,
+      0.8152519893899204,
+      0.8272206933916971,
+      0.8159547323116096,
+      0.817276142554953
+    ],
+    "logistic_regression_untuned": [
+      0.8189072693383038,
+      0.8150512581547064,
+      0.8272206933916971,
+      0.8160495019231078,
+      0.8177088641772656
+    ],
+    "xgboost": [
+      0.8488493798838626,
+      0.8324467703778049,
+      0.8485536905611255,
+      0.8419600501384888,
+      0.8489282987424251
+    ],
+    "xgboost_untuned": [
+      0.8504928668721772,
+      0.831145601835257,
+      0.8511741597243456,
+      0.8404920152132048,
+      0.8466118075783504
+    ]
+  },
+  "mean_outer_fold_auroc": {
+    "logistic_regression": 0.8189187601352709,
+    "logistic_regression_untuned": 0.8189875173970161,
+    "xgboost": 0.8441476379407413,
+    "xgboost_untuned": 0.8439832902446669
+  },
+  "outer_fold_parameters": [
+    {
+      "outer_fold": 0,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 100
+      }
+    },
+    {
+      "outer_fold": 0,
+      "model": "logistic_regression_untuned",
+      "parameters": {
+        "model__C": 1.0
+      }
+    },
+    {
+      "outer_fold": 0,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 4,
+        "model__min_child_weight": 1,
+        "model__n_estimators": 200,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 0,
+      "model": "xgboost_untuned",
+      "parameters": {
+        "model__n_estimators": 250,
+        "model__max_depth": 3,
+        "model__learning_rate": 0.05,
+        "model__min_child_weight": 1,
+        "model__reg_lambda": 1
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 100
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "logistic_regression_untuned",
+      "parameters": {
+        "model__C": 1.0
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 4,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 1,
+      "model": "xgboost_untuned",
+      "parameters": {
+        "model__n_estimators": 250,
+        "model__max_depth": 3,
+        "model__learning_rate": 0.05,
+        "model__min_child_weight": 1,
+        "model__reg_lambda": 1
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 1
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "logistic_regression_untuned",
+      "parameters": {
+        "model__C": 1.0
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 3,
+        "model__min_child_weight": 1,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 2,
+      "model": "xgboost_untuned",
+      "parameters": {
+        "model__n_estimators": 250,
+        "model__max_depth": 3,
+        "model__learning_rate": 0.05,
+        "model__min_child_weight": 1,
+        "model__reg_lambda": 1
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "logistic_regression_untuned",
+      "parameters": {
+        "model__C": 1.0
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 4,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 3,
+      "model": "xgboost_untuned",
+      "parameters": {
+        "model__n_estimators": 250,
+        "model__max_depth": 3,
+        "model__learning_rate": 0.05,
+        "model__min_child_weight": 1,
+        "model__reg_lambda": 1
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "logistic_regression",
+      "parameters": {
+        "model__C": 100
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "logistic_regression_untuned",
+      "parameters": {
+        "model__C": 1.0
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "xgboost",
+      "parameters": {
+        "model__learning_rate": 0.03,
+        "model__max_depth": 3,
+        "model__min_child_weight": 5,
+        "model__n_estimators": 400,
+        "model__reg_lambda": 10
+      }
+    },
+    {
+      "outer_fold": 4,
+      "model": "xgboost_untuned",
+      "parameters": {
+        "model__n_estimators": 250,
+        "model__max_depth": 3,
+        "model__learning_rate": 0.05,
+        "model__min_child_weight": 1,
+        "model__reg_lambda": 1
+      }
+    }
+  ],
+  "final_parameters": {
+    "logistic_regression": {
+      "model__C": 0.1
+    },
+    "logistic_regression_untuned": {
+      "model__C": 1.0
+    },
+    "xgboost": {
+      "model__learning_rate": 0.1,
+      "model__max_depth": 2,
+      "model__min_child_weight": 1,
+      "model__n_estimators": 200,
+      "model__reg_lambda": 10
+    },
+    "xgboost_untuned": {
+      "model__n_estimators": 250,
+      "model__max_depth": 3,
+      "model__learning_rate": 0.05,
+      "model__min_child_weight": 1,
+      "model__reg_lambda": 1
+    }
+  },
+  "development_n": 16685,
+  "development_events": 1888,
+  "development_followup": {
+    "followup_field": "hospital_observed_48h",
+    "patients": 16685,
+    "negative_labels_without_complete_observation": 639,
+    "known_events_without_complete_observation": 1065,
+    "policy": "retain_recorded_labels"
+  },
+  "test_outcomes_used_for_training_or_selection": false
+}

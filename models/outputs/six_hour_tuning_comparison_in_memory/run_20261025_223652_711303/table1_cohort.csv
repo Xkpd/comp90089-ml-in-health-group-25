@@ -1,0 +1,22 @@
+Characteristic,Development,Temporal test,Removed by missingness filter (all years),Full eligible cohort (all years)
+"Patients, n",15241,880,1761,18620
+"Age, median [IQR]",66 [55–76],65 [54–74],64 [50–77],66 [55–76]
+"Female, n (%)",5777 (37.9%),315 (35.8%),769 (43.7%),7170 (38.5%)
+"ICU hours before extubation, median [IQR]",21.8 [10.5–63.7],40.1 [15.5–96.7],31.4 [14.2–85.2],23.4 [11.0–68.2]
+"Hospital hours before extubation, median [IQR]",48.5 [22.1–123.2],68.7 [33.6–158.6],43.2 [17.7–133.3],49.6 [22.3–128.6]
+"ICU type: Cardiac Vascular Intensive Care Unit (CVICU), n (%)",6135 (40.3%),326 (37.0%),68 (3.9%),6734 (36.2%)
+"ICU type: Medical Intensive Care Unit (MICU), n (%)",2318 (15.2%),121 (13.8%),482 (27.4%),3075 (16.5%)
+"ICU type: Surgical Intensive Care Unit (SICU), n (%)",2168 (14.2%),74 (8.4%),308 (17.5%),2645 (14.2%)
+"ICU type: Trauma SICU (TSICU), n (%)",1982 (13.0%),110 (12.5%),311 (17.7%),2467 (13.2%)
+"ICU type: Medical/Surgical Intensive Care Unit (MICU/SICU), n (%)",1368 (9.0%),59 (6.7%),250 (14.2%),1767 (9.5%)
+"ICU type: Coronary Care Unit (CCU), n (%)",855 (5.6%),54 (6.1%),167 (9.5%),1126 (6.0%)
+"ICU type: Neuro Surgical Intensive Care Unit (Neuro SICU), n (%)",188 (1.2%),54 (6.1%),101 (5.7%),372 (2.0%)
+"ICU type: Neuro Intermediate, n (%)",124 (0.8%),55 (6.2%),39 (2.2%),253 (1.4%)
+"ICU type: Neuro Stepdown, n (%)",100 (0.7%),0 (0.0%),12 (0.7%),116 (0.6%)
+"ICU type: Surgery/Vascular/Intermediate, n (%)",0 (0.0%),14 (1.6%),16 (0.9%),35 (0.2%)
+"ICU type: Other, n (%)",3 (0.0%),13 (1.5%),7 (0.4%),30 (0.2%)
+"Extubation failure, n (%)",1402 (9.2%),96 (10.9%),572 (32.5%),2150 (11.5%)
+"  Death within 48 h, n (%)",633 (4.2%),50 (5.7%),499 (28.3%),1229 (6.6%)
+"  Reintubation within 48 h, n (%)",786 (5.2%),49 (5.6%),76 (4.3%),946 (5.1%)
+"Negative labels without complete 48-h observation, n",478,21,188,702
+"Model predictors missing, mean %",21.8,24.0,45.1,24.2
