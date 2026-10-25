@@ -1,0 +1,15 @@
+{
+  "numpy": "2.4.4",
+  "pandas": "3.0.2",
+  "scikit-learn": "1.8.0",
+  "xgboost": "3.2.0",
+  "scipy": "1.17.1",
+  "matplotlib": "3.10.8",
+  "joblib": "1.5.3",
+  "google-cloud-bigquery": "3.44.0",
+  "db-dtypes": "1.7.1",
+  "pyarrow": "19.0.1",
+  "google-auth": "2.38.0",
+  "ipython": "8.12.3",
+  "python": "3.12.2"
+}

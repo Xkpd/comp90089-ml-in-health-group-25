@@ -1,0 +1,8 @@
+Step,Patients,Stage,removed
+1,21981,base,0
+2,21981,remove non-adult,0
+3,21513,remove unplanned extubation (patient and non-patient initiated),468
+4,21513,remove non-first extubation,0
+5,19178,remove patients without invasive ventilation prior to extubation,2335
+6,19021,remove patients with DNR/DNI orders,157
+7,17146,remove patients with > 50% missing 6h averaged features,1875
